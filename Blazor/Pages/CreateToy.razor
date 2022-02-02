@@ -1,0 +1,71 @@
+﻿@page "/CreateToy"
+@using Blazor.Models
+@using Blazor.Data
+
+@inject IChildService ChildService
+@inject IToyService ToyService
+@inject NavigationManager NavigationManager
+<h3>Create Toy</h3>
+
+<EditForm Model="@newToyItem" OnValidSubmit="@AddNewToy" Context="Form">
+    <DataAnnotationsValidator/> 
+    <ValidationSummary/>
+    <div class="form-group">Name:<br/> <InputText @bind-Value="newToyItem.Name"/> </div>
+    <div class="form-group">Color:<br/> <InputText @bind-Value="newToyItem.Color"/></div>
+    <div class="form-group"> Condition:<br/> <InputText @bind-Value="newToyItem.Condition"/></div>
+    <div class="form-group">Favourite:<br/><Input type="checkbox" checked="@newToyItem.IsFavourite" @onchange="@(arg => FavouriteChanged(arg))"></div>
+    <div >Choose a child:<br/>
+        <InputSelect @bind-Value="newToyItem.OwnerId">
+            @if (allChildren == null)
+            {
+                <p>
+                    <em>Loading children...</em>
+                </p>
+            }
+            else if (!allChildren.Any())
+            {
+                <p> 
+                    <em>No childern exist. Please add some.</em>
+                </p>
+            }
+            else
+            {
+                <option value="">Select Child</option>
+                @foreach (var child in allChildren)
+                {
+                    <option value="@child.Id">@child.Name</option>
+                }
+            }
+        </InputSelect>
+        </div>
+    <div>
+    <p class="actions">
+        <button class="btn btn-outline-dark" type="submit">Create</button>
+    </p>
+    </div>
+</EditForm>
+
+@code {
+    private Toy newToyItem = new Toy();
+    private IList<Child> allChildren;
+    private IList<Child> children;
+
+    protected override async Task OnInitializedAsync()
+    {
+        children = await ChildService.GetChildrenAsync();
+        allChildren = children;
+    }
+
+
+    private async Task AddNewToy()
+    {
+        await ToyService.AddToyAsync(newToyItem);
+        NavigationManager.NavigateTo("/");
+
+    }
+
+    private void FavouriteChanged(ChangeEventArgs evt)
+    {
+        newToyItem.IsFavourite = (bool) evt.Value;
+    }
+}

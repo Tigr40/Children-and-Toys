@@ -1,0 +1,30 @@
+﻿@page "/CreateChild"
+<h3>CreateChild</h3>
+
+@using WebApplication.Models
+@using WebApplication.Data
+
+@inject IChildService childService
+@inject NavigationManager NavigationManager
+<h3>CreateChild</h3>
+
+<EditForm Model="@newChildItem" OnValidSubmit="@AddNewChild" Context="Form">
+    <DataAnnotationsValidator/> 
+    <ValidationSummary/>
+    <div class="form-group">Name:<br/> <InputText @bind-Value="newChildItem.Name"/> </div>
+    <div class="form-group">Age:<br/> <InputNumber @bind-Value="newChildItem.Age"/></div>
+    <div class="form-group"> Gender:<br/> <InputText @bind-Value="newChildItem.Gender"/></div>
+   <p class="actions">
+                <button class="btn btn-outline-dark" type="submit">Create</button>
+            </p>
+</EditForm>
+
+@code {
+    private Child newChildItem = new Child();
+
+    private async Task AddNewChild()
+    {
+        await childService.AddChildAsync(newChildItem);
+        NavigationManager.NavigateTo("/");
+    }
+}

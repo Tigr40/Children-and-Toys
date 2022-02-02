@@ -1,0 +1,133 @@
+﻿@page "/ShowPage"
+
+@using Blazor.Models
+
+@inject Data.IToyService ToyService
+@inject Data.IChildService ChildDataService
+<h3>Show Children and Toys</h3>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2">
+            <p>Filter by Gender: </p>
+            <select @bind="genderFilter">
+                <option value=""></option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+            </select>
+            <button class="btn btn-outline-dark" @onclick="@FilterData">Apply</button>
+        </div>
+        <div class="col-md-2">
+            <p>Filter by Favourite Toys: </p>
+            <select @bind="favoriteFilter">
+                <option value="2"></option>
+                <option value="0">Not Favourite</option>
+                <option value="1">Favourite</option>
+            </select>
+            <button class="btn btn-outline-dark" @onclick="@FilterFavouriteData">Apply</button>
+        </div>
+    </div>
+</div>
+
+@if (childrenToShow == null)
+{
+    <p>
+        <em>Loading children</em>
+    </p>
+}
+else if (!childrenToShow.Any())
+{
+    <p>
+        <em>No children to show</em>
+    </p>
+}
+else {
+    foreach(var child in childrenToShow)
+    {
+        <p>@child.Name is @child.Age years old and has:</p>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Condition</th>
+                <th>Favorite</th>
+                <th>Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var toy in toysToShow)
+            {
+                if(child.Id == toy.OwnerId)
+                {
+                    <tr>
+                        <td>@toy.Name</td>
+                        <td>@toy.Color</td>
+                        <td>@toy.Condition</td>
+                        <td>@toy.IsFavourite</td>
+                        <td><button @onclick="@(() => RemoveToy(toy.Id))">
+                            <i class="oi oi-trash" style="color:#ff0000"/>
+                        </button></td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private IList<Toy> toysToShow;
+    private IList<Toy> allToys;
+    private IList<Child> allChildren;
+    private IList<Child> childrenToShow;
+    private string genderFilter;
+    private int favoriteFilter;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        allChildren = await ChildDataService.GetChildrenAsync();
+        allToys = await ToyService.GetAllToysAsync();
+        
+        childrenToShow = allChildren;
+        toysToShow = allToys;
+    }
+
+    public async Task RemoveToy(int id)
+    {
+        Toy toRemove = allToys.First(t => t.Id == id);
+        ToyService.DeleteToyAsync(id);
+        allToys.Remove(toRemove);
+        toysToShow.Remove(toRemove);
+    }
+
+    public void FilterData()
+    {
+        childrenToShow = allChildren.Where(c =>
+            !genderFilter.Equals("") && c.Gender.Equals(genderFilter) || genderFilter.Equals("")).ToList();
+      
+    }
+
+    public void FilterFavouriteData()
+    {
+        bool chosen = true;
+        if (favoriteFilter == 0)
+        {
+            chosen = false;
+            toysToShow = allToys.Where(t =>
+                chosen == t.IsFavourite).ToList();
+        } 
+        else if (favoriteFilter == 1)
+        {
+            chosen = true;
+            toysToShow = allToys.Where(t =>
+                chosen == t.IsFavourite).ToList();
+        }
+        else
+        {
+            toysToShow = allToys;
+
+        }
+        
+    }
+}

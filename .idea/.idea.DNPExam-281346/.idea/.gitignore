@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/modules.xml
+/projectSettingsUpdater.xml
+/.idea.DNPExam-281346.iml
+# Datasource local storage ignored files
+/../../../../../../../../:\Users\iliya\RiderProjects\DNPExam-281346\.idea\.idea.DNPExam-281346\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
